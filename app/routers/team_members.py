@@ -22,7 +22,7 @@ def list_members(db: Session = Depends(get_session)) -> list[TeamMember]:
 
 @router.post("", response_model=TeamMemberOut, status_code=status.HTTP_201_CREATED)
 def create_member(body: TeamMemberCreate, db: Session = Depends(get_session)) -> TeamMember:
-    member = TeamMember(name=body.name.strip())
+    member = TeamMember(name=body.name.strip(), color=body.color)
     db.add(member)
     db.commit()
     db.refresh(member)

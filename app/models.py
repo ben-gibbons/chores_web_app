@@ -29,6 +29,21 @@ class AssignmentMode(StrEnum):
     ROUND_ROBIN = "round_robin"
 
 
+MEMBER_COLORS: tuple[str, ...] = (
+    "#ef4444",  # red
+    "#f97316",  # orange
+    "#f59e0b",  # amber
+    "#eab308",  # yellow
+    "#10b981",  # emerald
+    "#14b8a6",  # teal
+    "#0ea5e9",  # sky
+    "#3b82f6",  # blue
+    "#8b5cf6",  # violet
+    "#ec4899",  # pink
+)
+DEFAULT_MEMBER_COLOR = MEMBER_COLORS[7]
+
+
 def _utcnow() -> datetime:
     return datetime.now(timezone.utc)
 
@@ -38,6 +53,9 @@ class TeamMember(Base):
 
     id: Mapped[int] = mapped_column(primary_key=True)
     name: Mapped[str] = mapped_column(String(100), nullable=False)
+    color: Mapped[str] = mapped_column(
+        String(7), default=DEFAULT_MEMBER_COLOR, nullable=False
+    )
     active: Mapped[bool] = mapped_column(Boolean, default=True, nullable=False)
     created_at: Mapped[datetime] = mapped_column(DateTime, default=_utcnow, nullable=False)
 

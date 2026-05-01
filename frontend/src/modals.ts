@@ -1,3 +1,4 @@
+import { MEMBER_COLORS } from "./types.js";
 import type { ChoreInput, Occurrence, TeamMember } from "./types.js";
 
 const ROOT_ID = "modal-root";
@@ -50,7 +51,9 @@ function makeField(labelText: string, input: HTMLElement): HTMLLabelElement {
   return label;
 }
 
-export function memberModal(onSubmit: (name: string) => Promise<void>): void {
+export function memberModal(
+  onSubmit: (name: string, color: string) => Promise<void>,
+): void {
   const form = document.createElement("form");
   form.className = "modal-form";
 
@@ -64,6 +67,27 @@ export function memberModal(onSubmit: (name: string) => Promise<void>): void {
   nameInput.maxLength = 100;
   nameInput.placeholder = "e.g. Alice";
   form.appendChild(makeField("Name", nameInput));
+
+  let selectedColor: string = MEMBER_COLORS[0];
+  const swatches = document.createElement("div");
+  swatches.className = "color-swatches";
+  const swatchButtons: HTMLButtonElement[] = [];
+  MEMBER_COLORS.forEach((color, idx) => {
+    const btn = document.createElement("button");
+    btn.type = "button";
+    btn.className = "color-swatch";
+    btn.style.backgroundColor = color;
+    btn.setAttribute("aria-label", `Color ${idx + 1}`);
+    if (idx === 0) btn.classList.add("selected");
+    btn.addEventListener("click", () => {
+      selectedColor = color;
+      for (const b of swatchButtons) b.classList.remove("selected");
+      btn.classList.add("selected");
+    });
+    swatchButtons.push(btn);
+    swatches.appendChild(btn);
+  });
+  form.appendChild(makeField("Color", swatches));
 
   const actions = document.createElement("div");
   actions.className = "modal-actions";
@@ -81,7 +105,7 @@ export function memberModal(onSubmit: (name: string) => Promise<void>): void {
     if (!name) return;
     submit.disabled = true;
     try {
-      await onSubmit(name);
+      await onSubmit(name, selectedColor);
       close();
     } catch (err) {
       submit.disabled = false;

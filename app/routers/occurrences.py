@@ -22,6 +22,7 @@ def _serialize(occ: Occurrence, chore: Chore, member: TeamMember | None) -> Occu
         scheduled_date=occ.scheduled_date,
         assigned_member_id=occ.assigned_member_id,
         assigned_member_name=member.name if member else None,
+        assigned_member_color=member.color if member else None,
         completed_at=occ.completed_at,
         completed_by_member_id=occ.completed_by_member_id,
     )
