@@ -15,10 +15,10 @@ async function request<T>(url: string, init?: RequestInit): Promise<T> {
 
 export const api = {
   listMembers: () => request<TeamMember[]>("/api/team-members"),
-  createMember: (name: string) =>
+  createMember: (name: string, color: string) =>
     request<TeamMember>("/api/team-members", {
       method: "POST",
-      body: JSON.stringify({ name }),
+      body: JSON.stringify({ name, color }),
     }),
   deleteMember: (id: number) =>
     request<void>(`/api/team-members/${id}`, { method: "DELETE" }),

@@ -43,8 +43,14 @@ function renderMembers(): void {
   for (const m of cachedMembers) {
     const li = document.createElement("li");
     li.className = "list-row";
+    const label = document.createElement("span");
+    label.className = "member-label";
+    const swatch = document.createElement("span");
+    swatch.className = "color-dot";
+    swatch.style.backgroundColor = m.color;
     const name = document.createElement("span");
     name.textContent = m.name;
+    label.append(swatch, name);
     const remove = document.createElement("button");
     remove.type = "button";
     remove.className = "btn ghost danger-text";
@@ -60,7 +66,7 @@ function renderMembers(): void {
         alert(`Failed: ${(err as Error).message}`);
       }
     });
-    li.append(name, remove);
+    li.append(label, remove);
     list.appendChild(li);
   }
 }
@@ -124,9 +130,20 @@ function occurrenceTitle(o: Occurrence): string {
   return `${o.chore_title}${who}`;
 }
 
+function darken(hex: string, factor = 0.75): string {
+  const m = /^#([0-9a-f]{6})$/i.exec(hex);
+  if (!m) return hex;
+  const n = parseInt(m[1]!, 16);
+  const r = Math.round(((n >> 16) & 0xff) * factor);
+  const g = Math.round(((n >> 8) & 0xff) * factor);
+  const b = Math.round((n & 0xff) * factor);
+  return `#${((r << 16) | (g << 8) | b).toString(16).padStart(6, "0")}`;
+}
+
 function occurrenceColor(o: Occurrence): { bg: string; border: string } {
   if (o.completed_at) return { bg: "#d1d5db", border: "#9ca3af" };
-  return { bg: "#3b82f6", border: "#2563eb" };
+  const bg = o.assigned_member_color ?? "#3b82f6";
+  return { bg, border: darken(bg) };
 }
 
 function setupCalendar(): void {
@@ -189,9 +206,10 @@ function setupCalendar(): void {
 
 function wireAddButtons(): void {
   document.querySelector('[data-action="add-member"]')?.addEventListener("click", () => {
-    memberModal(async (name) => {
-      await api.createMember(name);
+    memberModal(async (name, color) => {
+      await api.createMember(name, color);
       await refreshMembers();
+      calendar?.refetchEvents();
     });
   });
   document.querySelector('[data-action="add-chore"]')?.addEventListener("click", () => {

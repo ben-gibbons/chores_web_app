@@ -2,9 +2,9 @@ from __future__ import annotations
 
 from datetime import date, datetime
 
-from pydantic import BaseModel, ConfigDict, Field, model_validator
+from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 
-from app.models import AssignmentMode, RecurrenceFreq
+from app.models import MEMBER_COLORS, AssignmentMode, RecurrenceFreq
 
 
 class TeamMemberOut(BaseModel):
@@ -12,11 +12,20 @@ class TeamMemberOut(BaseModel):
 
     id: int
     name: str
+    color: str
     active: bool
 
 
 class TeamMemberCreate(BaseModel):
     name: str = Field(min_length=1, max_length=100)
+    color: str
+
+    @field_validator("color")
+    @classmethod
+    def _check_color(cls, v: str) -> str:
+        if v not in MEMBER_COLORS:
+            raise ValueError(f"color must be one of {MEMBER_COLORS}")
+        return v
 
 
 class ChoreBase(BaseModel):
@@ -76,6 +85,7 @@ class OccurrenceOut(BaseModel):
     scheduled_date: date
     assigned_member_id: int | None
     assigned_member_name: str | None
+    assigned_member_color: str | None
     completed_at: datetime | None
     completed_by_member_id: int | None
 
